@@ -1,0 +1,84 @@
+"use client";
+
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { OAuthButtons } from "@/components/OAuthButtons";
+
+export function SignInForm({
+  googleEnabled,
+  microsoftEnabled
+}: {
+  googleEnabled: boolean;
+  microsoftEnabled: boolean;
+}) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    setIsSubmitting(true);
+
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+      callbackUrl
+    });
+
+    setIsSubmitting(false);
+
+    if (result?.error) {
+      setError("Invalid email or password.");
+      return;
+    }
+
+    router.push(callbackUrl);
+    router.refresh();
+  }
+
+  return (
+    <div className="space-y-5">
+      <OAuthButtons googleEnabled={googleEnabled} microsoftEnabled={microsoftEnabled} callbackUrl={callbackUrl} />
+
+      <form onSubmit={onSubmit} className="space-y-4">
+        <label className="block text-sm font-medium text-slate-700">
+          Email
+          <input
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            type="email"
+            required
+            className="mt-2 h-11 w-full rounded-md border border-slate-300 px-3 outline-none focus:border-accent focus:ring-2 focus:ring-blue-100"
+          />
+        </label>
+        <label className="block text-sm font-medium text-slate-700">
+          Password
+          <input
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            type="password"
+            minLength={8}
+            required
+            className="mt-2 h-11 w-full rounded-md border border-slate-300 px-3 outline-none focus:border-accent focus:ring-2 focus:ring-blue-100"
+          />
+        </label>
+        {error ? <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="h-11 w-full rounded-md bg-accent px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
+        >
+          {isSubmitting ? "Signing in..." : "Sign in"}
+        </button>
+      </form>
+    </div>
+  );
+}

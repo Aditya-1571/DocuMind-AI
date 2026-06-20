@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f8fafc;
+  color: #111827;
+}
+
+.dark body {
+  background: #020617;
+  color: #e5e7eb;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+.prose-report {
+  white-space: pre-wrap;
+  line-height: 1.75;
+}
