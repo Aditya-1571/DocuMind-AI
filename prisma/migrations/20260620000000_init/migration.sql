@@ -3,11 +3,11 @@ CREATE TABLE "User" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT,
     "email" TEXT,
-    "emailVerified" DATETIME,
+    "emailVerified" TIMESTAMP(3),
     "image" TEXT,
     "passwordHash" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL
 );
 
 -- CreateTable
@@ -32,7 +32,7 @@ CREATE TABLE "Session" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "sessionToken" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "expires" DATETIME NOT NULL,
+    "expires" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -40,7 +40,7 @@ CREATE TABLE "Session" (
 CREATE TABLE "VerificationToken" (
     "identifier" TEXT NOT NULL,
     "token" TEXT NOT NULL,
-    "expires" DATETIME NOT NULL
+    "expires" TIMESTAMP(3) NOT NULL
 );
 
 -- CreateTable
@@ -53,8 +53,8 @@ CREATE TABLE "Document" (
     "size" INTEGER NOT NULL,
     "storagePath" TEXT NOT NULL,
     "openaiFileId" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "Document_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -65,7 +65,7 @@ CREATE TABLE "Analysis" (
     "instruction" TEXT,
     "content" TEXT NOT NULL,
     "model" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "Analysis_documentId_fkey" FOREIGN KEY ("documentId") REFERENCES "Document" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -76,7 +76,7 @@ CREATE TABLE "ChatMessage" (
     "role" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "model" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "ChatMessage_documentId_fkey" FOREIGN KEY ("documentId") REFERENCES "Document" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
