@@ -4,8 +4,7 @@ import { redirect } from "next/navigation";
 import { FileText, Upload } from "lucide-react";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { SignOutButton } from "@/components/SignOutButton";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { HeaderMenu } from "@/components/HeaderMenu";
 import { UploadForm } from "@/app/dashboard/upload-form";
 
 export default async function DashboardPage() {
@@ -31,13 +30,10 @@ export default async function DashboardPage() {
       <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
           <div>
-            <p className="text-sm font-semibold text-accent">AI PPT Analyzer</p>
+            <p className="text-sm font-semibold text-accent">Your DOC Analyzer</p>
             <h1 className="text-xl font-semibold text-ink dark:text-slate-100">Document dashboard</h1>
           </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <SignOutButton />
-          </div>
+          <HeaderMenu />
         </div>
       </header>
 

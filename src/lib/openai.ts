@@ -19,7 +19,7 @@ export function getOpenAIClient() {
     defaultHeaders: process.env.OPENROUTER_API_KEY
       ? {
           "HTTP-Referer": process.env.NEXTAUTH_URL || "http://localhost:3000",
-          "X-OpenRouter-Title": "AI PPT Analyzer"
+          "X-OpenRouter-Title": "Your DOC Analyzer"
         }
       : undefined
   });

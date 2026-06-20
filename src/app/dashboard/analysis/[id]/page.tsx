@@ -4,8 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, FileText } from "lucide-react";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { SignOutButton } from "@/components/SignOutButton";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { HeaderMenu } from "@/components/HeaderMenu";
 import { ChatPanel } from "@/app/dashboard/analysis/[id]/chat-panel";
 
 export default async function AnalysisPage({ params }: { params: { id: string } }) {
@@ -49,10 +48,7 @@ export default async function AnalysisPage({ params }: { params: { id: string } 
             </Link>
             <h1 className="text-xl font-semibold text-ink dark:text-slate-100">{document.originalName}</h1>
           </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <SignOutButton />
-          </div>
+          <HeaderMenu />
         </div>
       </header>
 

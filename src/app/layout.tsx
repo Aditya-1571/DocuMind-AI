@@ -6,7 +6,7 @@ import "@/app/globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "AI PPT Analyzer",
+  title: "Your DOC Analyzer",
   description: "Analyze documents with AI and turn them into useful study reports."
 };
 
