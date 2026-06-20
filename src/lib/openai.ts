@@ -116,14 +116,13 @@ export async function createDocumentResponse({
   prompt,
   extractedText
 }: {
-  buffer: Buffer;
+  buffer?: Buffer;
   filename: string;
-  mimeType: string;
+  mimeType?: string;
   prompt: string;
   extractedText?: string;
 }) {
   const client = getOpenAIClient();
-  const dataUrl = `data:${mimeType || "application/octet-stream"};base64,${buffer.toString("base64")}`;
 
   if (process.env.OPENROUTER_API_KEY) {
     const response = await client.chat.completions.create({
@@ -139,6 +138,17 @@ export async function createDocumentResponse({
 
     return getChatCompletionText(response);
   }
+
+  if (!buffer) {
+    const response = await client.responses.create({
+      model: OPENAI_MODEL,
+      input: `${prompt}\n\nDocument name: ${filename}\n\nExtracted document text:\n${extractedText || "No readable text could be extracted from this document."}`
+    });
+
+    return getResponseText(response);
+  }
+
+  const dataUrl = `data:${mimeType || "application/octet-stream"};base64,${buffer.toString("base64")}`;
 
   const response = await client.responses.create({
     model: OPENAI_MODEL,

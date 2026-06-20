@@ -1,9 +1,7 @@
-import fs from "node:fs/promises";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { authOptions } from "@/lib/auth";
-import { extractDocumentText, limitExtractedText } from "@/lib/documents";
 import { AI_MODEL, createDocumentResponse, getAIProviderError, getOpenAIClient } from "@/lib/openai";
 import { prisma } from "@/lib/prisma";
 
@@ -49,18 +47,10 @@ export async function POST(request: Request, { params }: { params: { id: string 
     return NextResponse.json({ error: "Document not found." }, { status: 404 });
   }
 
-  let client;
-
   try {
-    client = getOpenAIClient();
+    getOpenAIClient();
   } catch (error) {
     return NextResponse.json({ error: "AI is not configured. Add OPENAI_API_KEY or OPENROUTER_API_KEY to your environment." }, { status: 500 });
-  }
-
-  const buffer = await fs.readFile(document.storagePath).catch(() => null);
-
-  if (!buffer) {
-    return NextResponse.json({ error: "The original uploaded file is missing from local storage." }, { status: 410 });
   }
 
   await prisma.chatMessage.create({
@@ -84,14 +74,13 @@ export async function POST(request: Request, { params }: { params: { id: string 
   ].join("\n\n");
 
   try {
-    const extractedText = limitExtractedText(await extractDocumentText(buffer, document.originalName));
+    const extractedText = document.extractedText || "";
 
     if (process.env.OPENROUTER_API_KEY && !extractedText) {
-      throw new Error("This file type cannot be used for chat with the current OpenRouter balance because file uploads require at least $0.50. Use a PDF, TXT, Markdown, or CSV file, or add OpenRouter credits.");
+      throw new Error("No readable extracted text is available for this document. Upload a text-based PDF, TXT, Markdown, or CSV file.");
     }
 
     const answer = await createDocumentResponse({
-      buffer,
       filename: document.originalName,
       mimeType: document.mimeType,
       prompt,

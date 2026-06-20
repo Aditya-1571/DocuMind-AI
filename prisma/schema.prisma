@@ -63,6 +63,7 @@ model Document {
   mimeType       String
   size           Int
   storagePath    String
+  extractedText  String?
   openaiFileId   String?
   analyses       Analysis[]
   chatMessages   ChatMessage[]

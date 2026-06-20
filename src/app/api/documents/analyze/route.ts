@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
@@ -30,32 +31,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: validationError }, { status: 400 });
   }
 
-  let client;
-
   try {
-    client = getOpenAIClient();
+    getOpenAIClient();
   } catch (error) {
     return NextResponse.json({ error: "AI is not configured. Add OPENAI_API_KEY or OPENROUTER_API_KEY to your environment." }, { status: 500 });
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const storedName = safeStoredName(file.name);
-  const uploadsDir = path.join(process.cwd(), "uploads");
+  const uploadsDir = process.env.VERCEL ? os.tmpdir() : path.join(process.cwd(), "uploads");
   const storagePath = path.join(uploadsDir, storedName);
-
-  await fs.mkdir(uploadsDir, { recursive: true });
-  await fs.writeFile(storagePath, buffer);
-
-  const document = await prisma.document.create({
-    data: {
-      userId: session.user.id,
-      originalName: file.name,
-      storedName,
-      mimeType: file.type || "application/octet-stream",
-      size: file.size,
-      storagePath
-    }
-  });
 
   const prompt = [
     "Analyze this uploaded document for a learner.",
@@ -74,8 +59,23 @@ export async function POST(request: Request) {
     const extractedText = limitExtractedText(await extractDocumentText(buffer, file.name));
 
     if (process.env.OPENROUTER_API_KEY && !extractedText) {
-      throw new Error("This file type cannot be analyzed with the current OpenRouter balance because file uploads require at least $0.50. Upload a PDF, TXT, Markdown, or CSV file, or add OpenRouter credits.");
+      throw new Error("No readable text could be extracted. Upload a text-based PDF, TXT, Markdown, or CSV file. Scanned image PDFs need OCR before analysis.");
     }
+
+    await fs.mkdir(uploadsDir, { recursive: true }).catch(() => undefined);
+    await fs.writeFile(storagePath, buffer).catch(() => undefined);
+
+    const document = await prisma.document.create({
+      data: {
+        userId: session.user.id,
+        originalName: file.name,
+        storedName,
+        mimeType: file.type || "application/octet-stream",
+        size: file.size,
+        storagePath,
+        extractedText: extractedText || null
+      }
+    });
 
     const content = await createDocumentResponse({
       buffer,
@@ -96,7 +96,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ documentId: document.id, analysisId: analysis.id });
   } catch (error) {
-    await prisma.document.delete({ where: { id: document.id } }).catch(() => undefined);
     await fs.unlink(storagePath).catch(() => undefined);
     const message = getAIProviderError(error);
     const creditError = message.includes("requires more credits") || message.includes("can only afford") || message.includes("$0.50");
